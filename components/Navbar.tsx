@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { clearSession, getSession } from "@/lib/auth";
 import { useEffect, useRef, useState } from "react";
-import { User, ChevronDown, LogOut as LogOutIcon } from "lucide-react";
+import { User, ChevronDown, LogOut as LogOutIcon, Menu as MenuIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -18,6 +18,11 @@ export function Navbar() {
   const [username, setUsername] = useState<string>("");
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // Logo fallback state (keeps your previous fallback logic)
+  const [logoSrc, setLogoSrc] = useState<string>("/shield_logo.png");
+  const [logoTriedSvg, setLogoTriedSvg] = useState<boolean>(false);
+  const [logoFailed, setLogoFailed] = useState<boolean>(false);
 
   const isDark = theme === "dark";
   const borderColor = isDark ? "rgba(255,255,255,0.16)" : "rgba(0,0,0,0.12)";
@@ -36,16 +41,12 @@ export function Navbar() {
     }
   }, [pathname]);
 
-  const handleLogout = () => {
-    clearSession();
-    setIsAuthed(false);
-    setOpen(false);
-    router.push("/login");
-  };
-
+  // Close on outside click / Esc for profile menu
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false);
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
     }
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") setOpen(false);
@@ -58,38 +59,97 @@ export function Navbar() {
     };
   }, []);
 
+  const handleLogout = () => {
+    clearSession();
+    setIsAuthed(false);
+    setOpen(false);
+    router.push("/login");
+  };
+
+  const initials = username
+    ? username
+        .split(" ")
+        .map((n) => n[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase()
+    : "I";
+
+  // menu button handler - dispatch a global event the Sidebar listens to
+  const toggleSidebar = () => {
+    window.dispatchEvent(new CustomEvent("toggleSidebar"));
+  };
+
   if (!isAuthed) return null;
 
   return (
     <nav className="sticky top-4 z-50 w-full bg-transparent">
-      <div className="flex items-center h-14 px-4 md:px-6">
-        {/* Left: Logo + Brand */}
+      <div className="flex items-center h-14 px-3 md:px-6">
+        {/* Menu button on the far left */}
+        <button
+          aria-label="Open menu"
+          title="Menu"
+          onClick={toggleSidebar}
+          className="flex items-center justify-center w-11 h-11 rounded-xl mr-3 transition-shadow focus:outline-none"
+          style={{
+            background: "transparent",
+            border: `1px solid ${borderColor}`,
+            boxShadow: glow,
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+          } as React.CSSProperties}
+        >
+          <MenuIcon size={20} style={{ color: iconColor }} />
+        </button>
+
         {/* Left: Logo + Brand */}
         <Link href="/dashboard" className="flex items-center gap-3 mr-4">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden bg-white/5"
+            className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden"
             style={{
+              background: "transparent",
               border: `1px solid ${borderColor}`,
               boxShadow: glow,
               backdropFilter: "blur(6px)",
               WebkitBackdropFilter: "blur(6px)",
             }}
           >
-            <Image
-              src="/shield_logo.png" 
-              alt="Integra logo"
-              width={32}
-              height={32}
-              className="object-contain"
-              priority
-              // If the image fails, this ensures we don't just have a blank box
-              onError={(e) => {
-                console.error("Logo failed to load");
-              }}
-            />
+            {!logoFailed ? (
+              <img
+                src={logoSrc}
+                alt="Integra logo"
+                width={28}
+                height={28}
+                className="object-contain"
+                onError={() => {
+                  if (!logoTriedSvg) {
+                    setLogoTriedSvg(true);
+                    setLogoSrc("/shield_logo.svg");
+                    console.warn("PNG logo failed, trying SVG fallback...");
+                  } else {
+                    setLogoFailed(true);
+                    console.warn("Logo image failed to load (png + svg). Showing fallback.");
+                  }
+                }}
+                decoding="async"
+                fetchPriority="high"
+                style={{ display: "block" }}
+              />
+            ) : (
+              <span
+                className="text-sm font-bold"
+                style={{ color: textColor }}
+                aria-hidden
+              >
+                {initials}
+              </span>
+            )}
           </div>
 
-          <span className="hidden sm:inline-block font-bold text-lg tracking-wider" style={{ color: textColor }}>
+          <span
+            className="hidden sm:inline-block font-bold text-lg tracking-wider"
+            style={{ color: textColor }}
+          >
             INTEGRA
           </span>
         </Link>
@@ -103,7 +163,7 @@ export function Navbar() {
 
           <div ref={containerRef} className="relative">
             <button
-              onClick={() => setOpen(!open)}
+              onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
               aria-haspopup="menu"
               className="flex items-center gap-3 px-3 py-1.5 rounded-xl transition-shadow focus:outline-none"
