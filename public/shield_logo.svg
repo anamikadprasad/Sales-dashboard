@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <!-- Define the shield path -->
+    <clipPath id="shieldClip">
+      <path d="M200,50 L320,90 L320,200 Q320,280 200,350 Q80,280 80,200 L80,90 Z"/>
+    </clipPath>
+  </defs>
+  
+  <!-- Left half - vibrant purple-blue -->
+  <path d="M200,50 L80,90 L80,200 Q80,280 200,350 L200,50 Z" 
+        fill="oklch(0.5854 0.2041 277.1173)" 
+        stroke="none"/>
+  
+  <!-- Right half - lighter accent blue -->
+  <path d="M200,50 L320,90 L320,200 Q320,280 200,350 L200,50 Z" 
+        fill="oklch(0.9299 0.0334 272.7879)" 
+        stroke="none"/>
+</svg>

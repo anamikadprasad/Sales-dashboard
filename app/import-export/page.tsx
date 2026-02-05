@@ -207,7 +207,7 @@ export default function ImportExportPage() {
       <h1 className="text-3xl font-bold">Import / Export Reports</h1>
 
       {/* Slicer-style Filters */}
-      <ChartCard title="Filters (Excel Slicer Style)">
+      <ChartCard title="Filters">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div>
             <label className="text-xs text-muted-foreground">Employee</label>
@@ -346,7 +346,7 @@ export default function ImportExportPage() {
       </ChartCard>
 
       {/* SALES ORDERS PREVIEW */}
-      <ChartCard title={`Sales Orders Preview (${filteredSales.length} rows)`}>
+      <ChartCard title={`Sales Orders Preview`}>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b border-border">
@@ -402,7 +402,7 @@ export default function ImportExportPage() {
       </ChartCard>
 
       {/* OPPORTUNITIES PREVIEW */}
-      <ChartCard title={`Opportunities Pipeline Preview (${filteredOpportunities.length} rows)`}>
+      <ChartCard title={`Opportunities Pipeline Preview`}>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b border-border">
